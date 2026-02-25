@@ -14,7 +14,7 @@ require_auth();
 
 $body = json_decode(file_get_contents('php://input'), true);
 
-if ($body) {
+if (!$body) {
     http_response_code(400);
     echo json_encode(['error' => 'Body non valido']);
     exit;
@@ -49,6 +49,7 @@ UPDATE next_event SET
 $stmt->execute([
     $body['title'],
     $body['date'],
+    $body['time'],
     $body['location'],
     $body['address'],
     $body['mapsUrl'] ?? '',
