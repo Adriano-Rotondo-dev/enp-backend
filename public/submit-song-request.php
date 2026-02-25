@@ -1,4 +1,7 @@
 <?php
+// Leggi il body PRIMA di includere cors.php
+$rawBody = file_get_contents('php://input');
+
 require_once __DIR__ . '/../middleware/cors.php';
 require_once __DIR__ . '/../config/db.php';
 
@@ -8,16 +11,21 @@ if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
     exit;
 }
 
-$body = json_decode(file_get_contents('php://input'), true);
+$body = json_decode($rawBody, true);
+
+if (json_last_error() !== JSON_ERROR_NONE || !is_array($body)) {
+    http_response_code(400);
+    echo json_encode(['error' => 'JSON non valido', 'raw' => $rawBody]);
+    exit;
+}
 
 $userEmail = trim($body['userEmail'] ?? '');
 $songRequest = trim($body['songRequest'] ?? '');
 $eventId = $body['eventId'] ?? null;
 
-// Validazione
 if (empty($userEmail) || !filter_var($userEmail, FILTER_VALIDATE_EMAIL)) {
     http_response_code(400);
-    echo json_encode(['error' => 'Email non valida']);
+    echo json_encode(['error' => 'Email non valida', 'received' => $userEmail]);
     exit;
 }
 
@@ -27,12 +35,8 @@ if (empty($songRequest) || strlen($songRequest) < 3) {
     exit;
 }
 
-// Rate limiting base — max 2 richieste per email per evento
 $pdo = getDB();
-$stmt = $pdo->prepare('
-  SELECT COUNT(*) FROM song_requests
-  WHERE user_email = ? AND event_id = ?
-');
+$stmt = $pdo->prepare('SELECT COUNT(*) FROM song_requests WHERE user_email = ? AND event_id = ?');
 $stmt->execute([$userEmail, $eventId]);
 $count = $stmt->fetchColumn();
 
@@ -42,11 +46,7 @@ if ($count >= 2) {
     exit;
 }
 
-// Insert
-$stmt = $pdo->prepare('
-  INSERT INTO song_requests (event_id, user_email, song_request)
-  VALUES (?, ?, ?)
-');
+$stmt = $pdo->prepare('INSERT INTO song_requests (event_id, user_email, song_request) VALUES (?, ?, ?)');
 $stmt->execute([$eventId, $userEmail, $songRequest]);
 
 http_response_code(201);
