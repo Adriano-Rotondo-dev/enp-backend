@@ -1,5 +1,6 @@
 <?php
 require_once __DIR__ . '/../middleware/cors.php';
+require_once __DIR__ . '/../config/db.php';
 require_once __DIR__ . '/../config/config.php';
 
 if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
@@ -11,6 +12,7 @@ if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
 // legge il body JSON inviato da Angular
 $body = json_decode(file_get_contents('php://input'), true);
 $password = $body['password'] ?? '';
+$username = $body['username'] ?? 'admin';
 
 if (empty($password)) {
     http_response_code(400);
@@ -18,13 +20,21 @@ if (empty($password)) {
     exit;
 }
 
-// verifica la password contro l'hash bcrypt
-if (!password_verify($password, ADMIN_PASSWORD_HASH)) {
-    // error message per pass errata
+// Legge dal DB invece che da config.php
+$pdo = getDB();
+$stmt = $pdo->prepare('SELECT * FROM admins WHERE username = ?');
+$stmt->execute([$username]);
+$admin = $stmt->fetch();
+
+if (!$admin || !password_verify($password, $admin['password_hash'])) {
     http_response_code(401);
     echo json_encode(['error' => 'Credenziali non valide']);
     exit;
 }
+
+// Aggiorna last_login
+$pdo->prepare('UPDATE admins SET last_login = NOW() WHERE id = ?')
+    ->execute([$admin['id']]);
 
 // generazione JWT
 function base64url_encode(string $data): string
@@ -53,6 +63,5 @@ function generate_jwt(): string
 }
 
 $token = generate_jwt();
-
 http_response_code(200);
 echo json_encode(['token' => $token]);
