@@ -6,7 +6,7 @@ define('DB_USER', 'root');
 define('DB_PASS', '');
 
 define('JWT_SECRET', 'enp_super_secret_key_cambiami_in_produzione');
-define('TOKEN_EXPIRY', 3600); // 1 ora
+define('TOKEN_EXPIRY', 86400); // 24 ore
 
 
 define('UPLOAD_DIR_POSTERS', __DIR__ . '/../uploads/posters/');
