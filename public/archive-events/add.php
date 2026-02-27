@@ -29,6 +29,8 @@ $vol = trim($event['vol'] ?? '');
 $name = trim($event['name'] ?? '');
 $date = trim($event['date'] ?? '');
 $description = trim($event['description'] ?? '');
+$spotifyUrl = trim($event['spotifyUrl'] ?? '');
+$liveMusicUrl = trim($event['liveMusicUrl'] ?? '');
 
 if (empty($vol) || empty($name) || empty($date)) {
     http_response_code(400);
@@ -54,10 +56,11 @@ if (isset($_FILES['poster']) && $_FILES['poster']['error'] === UPLOAD_ERR_OK) {
 
 $pdo = getDB();
 $stmt = $pdo->prepare('
-    INSERT INTO archive_events (vol, name, date, description, poster_url)
-    VALUES (?, ?, ?, ?, ?)
+    INSERT INTO archive_events (vol, name, date, description, poster_url, spotify_url, live_music_url)
+    VALUES (?, ?, ?, ?, ?, ?, ?)
 ');
-$stmt->execute([$vol, $name, $date, $description, $posterUrl]);
+$stmt->execute([$vol, $name, $date, $description, $posterUrl, $spotifyUrl, $liveMusicUrl]);
+
 $newId = (int) $pdo->lastInsertId();
 
 http_response_code(201);
@@ -67,5 +70,7 @@ echo json_encode([
     'name' => $name,
     'date' => $date,
     'description' => $description,
-    'posterUrl' => $posterUrl
+    'posterUrl' => $posterUrl,
+    'spotifyUrl' => $spotifyUrl,
+    'liveMusicUrl' => $liveMusicUrl
 ]);

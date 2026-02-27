@@ -32,6 +32,7 @@ $title = trim($body['title'] ?? '');
 $tag = trim($body['tag'] ?? '');
 $eventDate = trim($body['eventDate'] ?? '');
 $author = trim($body['author'] ?? '');
+$archiveEventId = !empty($body['archiveEventId']) ? (int) $body['archiveEventId'] : null;
 
 if (empty($title) || empty($tag)) {
     http_response_code(400);
@@ -42,10 +43,10 @@ if (empty($title) || empty($tag)) {
 $pdo = getDB();
 $stmt = $pdo->prepare('
     UPDATE photos
-    SET title = ?, tag = ?, event_date = ?, author = ?
+    SET title = ?, tag = ?, event_date = ?, author = ?, archive_event_id = ?
     WHERE id = ?
 ');
-$stmt->execute([$title, $tag, $eventDate, $author, $id]);
+$stmt->execute([$title, $tag, $eventDate, $author, $archiveEventId, $id]);
 
 http_response_code(200);
 echo json_encode(['success' => true]);

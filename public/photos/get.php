@@ -10,9 +10,19 @@ if ($_SERVER['REQUEST_METHOD'] !== 'GET') {
 
 $pdo = getDB();
 $stmt = $pdo->prepare('
-    SELECT id, url, title, tag, event_date AS eventDate, author
-    FROM photos
-    ORDER BY id DESC
+    SELECT 
+        p.id,
+        p.url,
+        p.title,
+        p.tag,
+        p.event_date AS eventDate,
+        p.author,
+        p.archive_event_id AS archiveEventId,
+        ae.vol AS eventVol,
+        ae.name AS eventName
+    FROM photos p
+    LEFT JOIN archive_events ae ON p.archive_event_id = ae.id
+    ORDER BY p.id DESC
 ');
 $stmt->execute();
 $photos = $stmt->fetchAll(PDO::FETCH_ASSOC);

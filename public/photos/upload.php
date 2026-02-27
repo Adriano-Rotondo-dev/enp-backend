@@ -40,6 +40,7 @@ $title = trim($photo['title'] ?? '');
 $tag = trim($photo['tag'] ?? '');
 $eventDate = trim($photo['eventDate'] ?? '');
 $author = trim($photo['author'] ?? '');
+$archiveEventId = !empty($photo['archiveEventId']) ? (int) $photo['archiveEventId'] : null;
 
 if (empty($title) || empty($tag)) {
     http_response_code(400);
@@ -66,10 +67,10 @@ $url = 'http://localhost/enp-backend/uploads/photos/' . $filename;
 
 $pdo = getDB();
 $stmt = $pdo->prepare('
-    INSERT INTO photos (url, title, tag, event_date, author)
-    VALUES (?, ?, ?, ?, ?)
+    INSERT INTO photos (url, title, tag, event_date, author, archive_event_id)
+    VALUES (?, ?, ?, ?, ?, ?)
 ');
-$stmt->execute([$url, $title, $tag, $eventDate, $author]);
+$stmt->execute([$url, $title, $tag, $eventDate, $author, $archiveEventId]);
 $newId = (int) $pdo->lastInsertId();
 
 http_response_code(201);
@@ -79,5 +80,6 @@ echo json_encode([
     'title' => $title,
     'tag' => $tag,
     'eventDate' => $eventDate,
-    'author' => $author
+    'author' => $author,
+    'archiveEventId' => $archiveEventId
 ]);

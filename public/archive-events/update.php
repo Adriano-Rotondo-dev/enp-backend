@@ -31,6 +31,8 @@ $vol = trim($body['vol'] ?? '');
 $name = trim($body['name'] ?? '');
 $date = trim($body['date'] ?? '');
 $description = trim($body['description'] ?? '');
+$spotifyUrl = trim($body['spotifyUrl'] ?? '');
+$liveMusicUrl = trim($body['liveMusicUrl'] ?? '');
 
 if (empty($vol) || empty($name) || empty($date)) {
     http_response_code(400);
@@ -41,10 +43,11 @@ if (empty($vol) || empty($name) || empty($date)) {
 $pdo = getDB();
 $stmt = $pdo->prepare('
     UPDATE archive_events
-    SET vol = ?, name = ?, date = ?, description = ?
+    SET vol = ?, name = ?, date = ?, description = ?, 
+        spotify_url = ?, live_music_url = ?
     WHERE id = ?
 ');
-$stmt->execute([$vol, $name, $date, $description, $id]);
+$stmt->execute([$vol, $name, $date, $description, $spotifyUrl, $liveMusicUrl, $id]);
 
 http_response_code(200);
 echo json_encode(['success' => true]);

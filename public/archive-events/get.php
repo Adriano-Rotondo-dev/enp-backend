@@ -10,7 +10,11 @@ if ($_SERVER['REQUEST_METHOD'] !== 'GET') {
 
 $pdo = getDB();
 $stmt = $pdo->prepare('
-    SELECT id, vol, name, date, description, poster_url AS posterUrl
+    SELECT 
+        id, vol, name, date, description, 
+        poster_url AS posterUrl,
+        spotify_url AS spotifyUrl,
+        live_music_url AS liveMusicUrl
     FROM archive_events
     ORDER BY id DESC
 ');
