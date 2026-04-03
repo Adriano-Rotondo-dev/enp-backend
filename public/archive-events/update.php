@@ -18,7 +18,9 @@ if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
 
 require_auth();
 
-// Recuperiamo l'oggetto event inviato come stringa JSON nel FormData
+$baseUrl = "http://localhost/enp-backend";
+
+// Recupero l'oggetto event inviato come stringa JSON nel FormData
 $eventJson = $_POST['event'] ?? null;
 $event = json_decode($eventJson, true);
 
@@ -38,7 +40,7 @@ $liveMusicUrl = trim($event['liveMusicUrl'] ?? ''); // Recupero camelCase da Ang
 
 $pdo = getDB();
 
-// 1. Recuperiamo l'URL attuale del poster dal database per non perderlo
+// 1. Recupero l'URL attuale del poster dal database per non perderlo
 $stmt = $pdo->prepare("SELECT poster_url FROM archive_events WHERE id = ?");
 $stmt->execute([$id]);
 $currentPoster = $stmt->fetchColumn();
@@ -60,23 +62,23 @@ if (isset($_FILES['file']) && $_FILES['file']['error'] === UPLOAD_ERR_OK) {
 
     if (move_uploaded_file($_FILES['file']['tmp_name'], $destPath)) {
         // Aggiorniamo l'URL solo se il caricamento è riuscito
-        $posterUrl = '/uploads/posters/' . $filename;
+        $posterUrl = $baseUrl . '/uploads/posters/' . $filename;
     }
 }
 
 // 3. UPDATE FINALE 
 try {
     $stmt = $pdo->prepare('
-        UPDATE archive_events
-        SET vol = ?, 
-            name = ?, 
-            date = ?, 
-            description = ?, 
-            poster_url = ?, 
-            spotify_url = ?, 
-            live_music_url = ?
-        WHERE id = ?
-    ');
+            UPDATE archive_events
+            SET vol = ?, 
+                name = ?, 
+                date = ?, 
+                description = ?, 
+                poster_url = ?, 
+                spotify_url = ?, 
+                live_music_url = ?
+            WHERE id = ?
+        ');
 
     $stmt->execute([
         $vol,
