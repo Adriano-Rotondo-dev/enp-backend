@@ -1,7 +1,7 @@
 # enp-backend
 
 Backend PHP per **Emo Night Palermo** — API REST che gestisce eventi, archivio e foto.  
-Progetto companion: [enp-web]([../enp-web/README.md](https://github.com/Adriano-Rotondo-dev/enp-web))
+Progetto companion: [enp-web](https://github.com/Adriano-Rotondo-dev/enp-web/blob/master/README.md)
 
 ---
 
